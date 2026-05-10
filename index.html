@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abu Khaisa — Manajemen Keuangan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Abu<span>Khaisa</span></div>
+    <div class="logo-sub">Manajemen Keuangan</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Utama</div>
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('transaksi')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      Transaksi
+    </div>
+    <div class="nav-item" onclick="navigate('laporan')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      Laporan
+    </div>
+    <div class="nav-item" onclick="navigate('anggaran')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Anggaran
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Pengaturan</div>
+    <div class="nav-item" onclick="navigate('pengaturan')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07M4.93 4.93a10 10 0 0 0 14.14 14.14"/></svg>
+      Konfigurasi
+    </div>
+    <div class="nav-item" onclick="navigate('panduan')">
+      <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Panduan Setup
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sync-status">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncText">Tidak terhubung</span>
+    </div>
+  </div>
+</aside>
+
+<!-- OVERLAY for mobile -->
+<div class="overlay-bg" id="overlayBg" onclick="closeSidebar()"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="topbar-title" id="topbarTitle">Dashboard <span id="topbarSub"></span></div>
+    <input type="month" id="globalMonth" onchange="onMonthChange()">
+    <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+      <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Tambah
+    </button>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- CONFIG BANNER -->
+    <div class="config-banner" id="configBanner">
+      <div class="config-icon">🔗</div>
+      <div class="config-body">
+        <h3>Hubungkan ke Google Spreadsheet</h3>
+        <p>Masukkan URL Google Apps Script Web App Anda untuk menyinkronkan data secara real-time. Data akan tersimpan otomatis di Google Spreadsheet Anda.</p>
+        <div class="config-fields">
+          <div class="field-group" style="grid-column: 1/-1">
+            <div class="field-label">URL Google Apps Script</div>
+            <input class="field-input" id="scriptUrlInput" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="saveConfig()">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12l5 5L20 7"/></svg>
+              Hubungkan
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="testConnection()">Test Koneksi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ DASHBOARD PAGE ═══════ -->
+    <div class="page active" id="page-dashboard">
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card balance">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Saldo Bersih</div>
+          <div class="stat-value" id="stat-balance">Rp 0</div>
+          <div class="stat-change" id="stat-balance-sub">Bulan ini</div>
+        </div>
+        <div class="stat-card income">
+          <div class="stat-icon">📈</div>
+          <div class="stat-label">Total Pemasukan</div>
+          <div class="stat-value" id="stat-income">Rp 0</div>
+          <div class="stat-change" id="stat-income-sub">0 transaksi</div>
+        </div>
+        <div class="stat-card expense">
+          <div class="stat-icon">📉</div>
+          <div class="stat-label">Total Pengeluaran</div>
+          <div class="stat-value" id="stat-expense">Rp 0</div>
+          <div class="stat-change" id="stat-expense-sub">0 transaksi</div>
+        </div>
+        <div class="stat-card saving">
+          <div class="stat-icon">🏦</div>
+          <div class="stat-label">Tingkat Tabungan</div>
+          <div class="stat-value" id="stat-saving">0%</div>
+          <div class="stat-change" id="stat-saving-sub">dari pemasukan</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Trend Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Tren Keuangan 6 Bulan
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-wrap">
+              <canvas id="trendChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Kategori Pengeluaran
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="donut-wrap">
+              <div class="donut-canvas-wrap">
+                <canvas class="donut-canvas" id="donutChart"></canvas>
+                <div class="donut-center-label">
+                  <div class="donut-center-val" id="donutCenterVal">—</div>
+                  <div class="donut-center-sub">Pengeluaran</div>
+                </div>
+              </div>
+              <div class="donut-legend" id="donutLegend">
+                <div style="color:var(--text3);font-size:13px;">Belum ada data</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula Summary -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Ringkasan Formula Keuangan</div>
+          </div>
+          <div class="card-body">
+            <div class="formula-card">
+              <div class="f-row"><span class="f-key">Total Pemasukan</span><span class="f-val positive" id="f-income">Rp 0</span></div>
+              <div class="f-row"><span class="f-key">Total Pengeluaran</span><span class="f-val negative" id="f-expense">Rp 0</span></div>
+              <div class="f-row"><span class="f-key">Saldo Bersih (Income - Expense)</span><span class="f-val" id="f-balance">Rp 0</span></div>
+              <div class="f-row"><span class="f-key">Rasio Tabungan (Balance / Income)</span><span class="f-val" id="f-saverate">0%</span></div>
+              <div class="f-row"><span class="f-key">Rasio Pengeluaran (Expense / Income)</span><span class="f-val" id="f-expratio">0%</span></div>
+              <div class="f-row"><span class="f-key">Rata-rata Pengeluaran/Hari</span><span class="f-val" id="f-avgday">Rp 0</span></div>
+              <div class="f-row"><span class="f-key">Jumlah Transaksi</span><span class="f-val" id="f-txcount">0</span></div>
+              <div class="f-row"><span class="f-key">Proyeksi Pengeluaran Bulanan</span><span class="f-val negative" id="f-projection">Rp 0</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎯 Aturan 50/30/20</div>
+            <span class="badge badge-blue">Analisis</span>
+          </div>
+          <div class="card-body">
+            <!-- 50/30/20 Rule -->
+            <div class="progress-item">
+              <div class="progress-info">
+                <span class="progress-label">🏠 Kebutuhan (50%)</span>
+                <span class="progress-val"><span id="prog-needs-val">Rp 0</span> / <span id="prog-needs-limit">Rp 0</span></span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="prog-needs" style="width:0%;background:var(--blue)"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-info">
+                <span class="progress-label">🎉 Keinginan (30%)</span>
+                <span class="progress-val"><span id="prog-wants-val">Rp 0</span> / <span id="prog-wants-limit">Rp 0</span></span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="prog-wants" style="width:0%;background:var(--gold)"></div></div>
+            </div>
+            <div class="progress-item">
+              <div class="progress-info">
+                <span class="progress-label">💰 Tabungan (20%)</span>
+                <span class="progress-val"><span id="prog-save-val">Rp 0</span> / <span id="prog-save-limit">Rp 0</span></span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" id="prog-save" style="width:0%;background:var(--green)"></div></div>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <div class="summary-row">
+                <span class="summary-key">💡 Status Keuangan</span>
+                <span class="summary-val" id="health-status">—</span>
+              </div>
+              <div class="summary-row">
+                <span class="summary-key">📅 Sisa Hari Bulan Ini</span>
+                <span class="summary-val" id="days-left" style="color:var(--blue)">— hari</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🕐 Transaksi Terbaru</div>
+          <button class="btn btn-outline btn-sm" onclick="navigate('transaksi')">Lihat Semua</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Deskripsi</th>
+                <th>Kategori</th>
+                <th>Tanggal</th>
+                <th style="text-align:right">Jumlah</th>
+              </tr>
+            </thead>
+            <tbody id="recentTxTable">
+              <tr><td colspan="4"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">Belum ada transaksi</div></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ TRANSAKSI PAGE ═══════ -->
+    <div class="page" id="page-transaksi">
+      <div class="card">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab(this,'all')">Semua</div>
+          <div class="tab" onclick="switchTab(this,'income')">Pemasukan</div>
+          <div class="tab" onclick="switchTab(this,'expense')">Pengeluaran</div>
+        </div>
+        <div class="filter-bar">
+          <span class="filter-label">Filter:</span>
+          <select id="filterCat" onchange="renderTransactions()">
+            <option value="">Semua Kategori</option>
+          </select>
+          <input type="date" id="filterFrom" onchange="renderTransactions()">
+          <input type="date" id="filterTo" onchange="renderTransactions()">
+          <div class="filter-spacer"></div>
+          <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+          <button class="btn btn-outline btn-sm" onclick="syncAll()">
+            <span class="loading-spinner" id="syncSpinner" style="display:none"></span>
+            🔄 Sync
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Deskripsi</th>
+                <th>Kategori</th>
+                <th>Tanggal</th>
+                <th>Catatan</th>
+                <th style="text-align:right">Jumlah</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="txTable"></tbody>
+          </table>
+        </div>
+        <div style="padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:16px;font-size:13px;color:var(--text3)">
+          <span>Total: <strong id="tableTotal" style="color:var(--text)">0</strong> transaksi</span>
+          <span>Pemasukan: <strong id="tableIncome" style="color:var(--green)">Rp 0</strong></span>
+          <span>Pengeluaran: <strong id="tableExpense" style="color:var(--red)">Rp 0</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ LAPORAN PAGE ═══════ -->
+    <div class="page" id="page-laporan">
+      <div class="grid-2" style="margin-bottom:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📅 Laporan Bulanan</div></div>
+          <div class="card-body">
+            <div id="monthlyReport"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 Perbandingan Kategori</div></div>
+          <div class="card-body">
+            <div id="categoryReport"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📈 Grafik Pemasukan vs Pengeluaran (6 Bulan)</div></div>
+        <div class="card-body">
+          <div style="height:200px"><canvas id="barChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ ANGGARAN PAGE ═══════ -->
+    <div class="page" id="page-anggaran">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🎯 Anggaran Bulanan</div>
+            <button class="btn btn-primary btn-sm" onclick="openBudgetModal()">+ Tambah</button>
+          </div>
+          <div class="card-body" id="budgetList">
+            <div class="empty-state"><div class="empty-icon">💸</div><div class="empty-text">Belum ada anggaran</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Analisis Anggaran</div></div>
+          <div class="card-body" id="budgetAnalysis">
+            <div style="color:var(--text3);font-size:13px">Tambah anggaran untuk melihat analisis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ PENGATURAN PAGE ═══════ -->
+    <div class="page" id="page-pengaturan">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚙️ Konfigurasi Google Spreadsheet</div></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">URL Google Apps Script Web App</label>
+                <input class="form-control" id="settingsUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nama Sheet (opsional)</label>
+                <input class="form-control" id="settingsSheet" type="text" placeholder="Sheet1" value="Transaksi">
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-primary" onclick="saveConfig()">💾 Simpan Konfigurasi</button>
+                <button class="btn btn-outline" onclick="testConnection()">🔌 Test Koneksi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🗂️ Manajemen Data</div></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-outline" onclick="syncAll()">🔄 Sinkronisasi Manual</button>
+              <button class="btn btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+              <button class="btn btn-outline" onclick="importCSV()">⬆ Import CSV</button>
+              <hr style="border-color:var(--border)">
+              <button class="btn btn-danger" onclick="clearLocalData()">🗑 Hapus Data Lokal</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-header"><div class="card-title">🏷️ Kelola Kategori</div></div>
+        <div class="card-body">
+          <div style="display:flex;gap:10px;margin-bottom:16px">
+            <input class="form-control" id="newCatInput" placeholder="Nama kategori baru..." style="flex:1">
+            <select class="form-control" id="newCatType" style="width:140px">
+              <option value="expense">Pengeluaran</option>
+              <option value="income">Pemasukan</option>
+            </select>
+            <button class="btn btn-primary" onclick="addCategory()">+ Tambah</button>
+          </div>
+          <div id="categoryList" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ PANDUAN PAGE ═══════ -->
+    <div class="page" id="page-panduan">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📖 Cara Setup Google Apps Script</div></div>
+          <div class="card-body">
+            <div class="guide-steps">
+              <div class="guide-step">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                  <div class="step-title">Buat Google Spreadsheet baru</div>
+                  <div class="step-desc">Buka Google Drive → New → Google Sheets. Beri nama sesuai keinginan (contoh: "Abu Khaisa Keuangan").</div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                  <div class="step-title">Buka Apps Script</div>
+                  <div class="step-desc">Di Spreadsheet, klik menu Extensions → Apps Script. Hapus kode yang ada, lalu paste kode Apps Script di bawah.</div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                  <div class="step-title">Deploy sebagai Web App</div>
+                  <div class="step-desc">Klik Deploy → New Deployment → Web App. Set Execute as: "Me", Who has access: "Anyone". Klik Deploy.</div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                  <div class="step-title">Salin URL Web App</div>
+                  <div class="step-desc">Setelah deploy, salin URL yang muncul (format: https://script.google.com/macros/s/.../exec)</div>
+                </div>
+              </div>
+              <div class="guide-step">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                  <div class="step-title">Tempel URL di Abu Khaisa</div>
+                  <div class="step-desc">Paste URL tersebut di kolom konfigurasi di atas, lalu klik Hubungkan.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">📝 Kode Google Apps Script</div></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Copy dan paste kode ini ke Google Apps Script Editor:</p>
+            <div class="code-snippet" id="appsScriptCode" style="max-height:400px;overflow-y:auto;white-space:pre;font-size:11px;line-height:1.6"></div>
+            <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="copyScript()">📋 Copy Kode</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <div class="card-header"><div class="card-title">📐 Format Spreadsheet</div></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Sheet "Transaksi" akan otomatis dibuat dengan kolom berikut:</p>
+          <div style="overflow-x:auto">
+            <table>
+              <thead><tr><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="tx-desc">ID</td>
+                  <td>Tanggal</td>
+                  <td>Tipe</td>
+                  <td>Kategori</td>
+                  <td>Deskripsi</td>
+                  <td>Jumlah</td>
+                  <td>Catatan</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ADD TRANSACTION MODAL -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Tambah Transaksi</div>
+      <button class="icon-btn" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <div class="type-toggle">
+            <button class="type-btn active-income" id="typeIncome" onclick="setType('income')">📈 Pemasukan</button>
+            <button class="type-btn" id="typeExpense" onclick="setType('expense')">📉 Pengeluaran</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jumlah (Rp)</label>
+          <div class="amount-wrapper">
+            <span class="amount-prefix">Rp</span>
+            <input class="form-control amount-input" id="txAmount" type="text" placeholder="0" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Kategori</label>
+            <select class="form-control" id="txCategory"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal</label>
+            <input class="form-control" id="txDate" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi</label>
+          <input class="form-control" id="txDesc" type="text" placeholder="Contoh: Gaji bulanan...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan (opsional)</label>
+          <input class="form-control" id="txNote" type="text" placeholder="Catatan tambahan...">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('addModal')">Batal</button>
+      <button class="btn btn-primary" id="submitBtn" onclick="submitTransaction()">
+        <span class="loading-spinner" id="submitSpinner" style="display:none"></span>
+        Simpan Transaksi
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div class="modal-overlay" id="budgetModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Tambah Anggaran</div>
+      <button class="icon-btn" onclick="closeModal('budgetModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Kategori</label>
+          <select class="form-control" id="budgetCat"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Batas Anggaran (Rp)</label>
+          <div class="amount-wrapper">
+            <span class="amount-prefix">Rp</span>
+            <input class="form-control amount-input" id="budgetAmount" type="text" placeholder="0" oninput="formatAmountInput(this)">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('budgetModal')">Batal</button>
+      <button class="btn btn-primary" onclick="saveBudget()">Simpan Anggaran</button>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
