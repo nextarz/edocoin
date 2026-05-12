@@ -713,6 +713,7 @@ canvas {
   display: flex;
   gap: 24px;
   align-items: center;
+  animation: none;
 }
 .donut-canvas-wrap {
   position: relative;

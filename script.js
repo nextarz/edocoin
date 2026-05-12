@@ -455,31 +455,79 @@ function renderLaporan() {
     )
     .join("");
 
-  // Category breakdown
+  // Category breakdown for both income and expense
   const txs = state.transactions;
-  const catTotals = {};
+
+  // Income categories
+  const incomeCatTotals = {};
+  txs
+    .filter((t) => t.type === "income")
+    .forEach((t) => {
+      incomeCatTotals[t.category] =
+        (incomeCatTotals[t.category] || 0) + t.amount;
+    });
+  const incomeSorted = Object.entries(incomeCatTotals).sort(
+    (a, b) => b[1] - a[1],
+  );
+  const incomeTotal = incomeSorted.reduce((s, [, v]) => s + v, 0);
+
+  // Expense categories
+  const expenseCatTotals = {};
   txs
     .filter((t) => t.type === "expense")
     .forEach((t) => {
-      catTotals[t.category] = (catTotals[t.category] || 0) + t.amount;
+      expenseCatTotals[t.category] =
+        (expenseCatTotals[t.category] || 0) + t.amount;
     });
-  const sorted = Object.entries(catTotals).sort((a, b) => b[1] - a[1]);
-  const total = sorted.reduce((s, [, v]) => s + v, 0);
+  const expenseSorted = Object.entries(expenseCatTotals).sort(
+    (a, b) => b[1] - a[1],
+  );
+  const expenseTotal = expenseSorted.reduce((s, [, v]) => s + v, 0);
 
-  document.getElementById("categoryReport").innerHTML = sorted.length
-    ? sorted
+  // Build HTML for both
+  let categoryHTML = "";
+
+  // Income section
+  if (incomeSorted.length) {
+    categoryHTML +=
+      '<div style="margin-bottom:20px"><div style="color:var(--text2);font-size:12px;font-weight:600;margin-bottom:10px">💰 PEMASUKAN</div>' +
+      incomeSorted
         .map(
           ([cat, val]) => `
         <div class="progress-item">
           <div class="progress-info">
             <span class="progress-label">${esc(cat)}</span>
-            <span class="progress-val">${fmtRp(val)} (${total > 0 ? ((val / total) * 100).toFixed(1) : 0}%)</span>
+            <span class="progress-val">${fmtRp(val)} (${incomeTotal > 0 ? ((val / incomeTotal) * 100).toFixed(1) : 0}%)</span>
           </div>
-          <div class="progress-bar"><div class="progress-fill" style="width:${total > 0 ? (val / total) * 100 : 0}%;background:${getCatColor(cat)}"></div></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${incomeTotal > 0 ? (val / incomeTotal) * 100 : 0}%;background:var(--green)"></div></div>
         </div>`,
         )
-        .join("")
-    : '<div style="color:var(--text3);font-size:13px">Belum ada data pengeluaran</div>';
+        .join("") +
+      "</div>";
+  }
+
+  // Expense section
+  if (expenseSorted.length) {
+    categoryHTML +=
+      '<div><div style="color:var(--text2);font-size:12px;font-weight:600;margin-bottom:10px">💸 PENGELUARAN</div>' +
+      expenseSorted
+        .map(
+          ([cat, val]) => `
+        <div class="progress-item">
+          <div class="progress-info">
+            <span class="progress-label">${esc(cat)}</span>
+            <span class="progress-val">${fmtRp(val)} (${expenseTotal > 0 ? ((val / expenseTotal) * 100).toFixed(1) : 0}%)</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${expenseTotal > 0 ? (val / expenseTotal) * 100 : 0}%;background:${getCatColor(cat)}"></div></div>
+        </div>`,
+        )
+        .join("") +
+      "</div>";
+  }
+
+  document.getElementById("categoryReport").innerHTML =
+    categoryHTML ||
+    '<div style="color:var(--text3);font-size:13px">Belum ada data transaksi</div>';
 
   renderBarChart(monthlyData);
 }
@@ -833,17 +881,8 @@ function renderDonut(txs) {
     ctx.stroke();
   }
 
-  // Smooth animation ~400ms
-  const duration = 420;
-  const start = performance.now();
-  function animate(now) {
-    const t = Math.min((now - start) / duration, 1);
-    // ease-out cubic
-    const p = 1 - Math.pow(1 - t, 3);
-    drawFrame(p);
-    if (t < 1) requestAnimationFrame(animate);
-  }
-  requestAnimationFrame(animate);
+  // Draw immediately without animation
+  drawFrame(1);
 
   // Legend
   document.getElementById("donutLegend").innerHTML = entries
@@ -1100,18 +1139,36 @@ async function syncAll() {
         // Merge: keep local new ones + server ones
         const serverIds = new Set(data.transactions.map((t) => t.id));
         const localNew = state.transactions.filter((t) => !serverIds.has(t.id));
-        state.transactions = [...data.transactions, ...localNew];
+        const fixedTransactions = data.transactions.map((t) => ({
+          ...t,
+          date:
+            typeof t.date === "string"
+              ? t.date.slice(0, 10)
+              : new Date(t.date).toISOString().slice(0, 10),
+        }));
+
+        state.transactions = [...fixedTransactions, ...localNew];
         saveToStorage();
         renderAll();
-        toast(
-          "Sinkronisasi berhasil! " + state.transactions.length + " transaksi",
-          "success",
-        );
+        // toast(
+        //"Sinkronisasi berhasil! " + state.transactions.length + " transaksi",
+        // "success",
+        //);
       }
     }
     setSyncStatus("connected");
+    const spinner = document.getElementById("syncSpinner");
+    if (spinner) {
+      setTimeout(() => {
+        spinner.style.display = "none";
+      }, 1000);
+    }
   } catch (e) {
     setSyncStatus("error");
+    const spinner = document.getElementById("syncSpinner");
+    if (spinner) {
+      spinner.style.display = "none";
+    }
     toast("Gagal sinkronisasi — periksa koneksi atau URL", "error");
   }
   if (spinner) spinner.style.display = "none";
@@ -1152,8 +1209,8 @@ function saveConfig() {
   saveToStorage();
   document.getElementById("configBanner").classList.add("hidden");
   updateConnectionStatus();
-  toast("Konfigurasi disimpan!", "success");
-  testConnection();
+  toast("Konfigurasi disimpan! Melakukan sinkronisasi...", "success");
+  syncAll();
 }
 
 function updateConnectionStatus() {
@@ -1382,12 +1439,28 @@ function formatAmountInput(input) {
 }
 function fmtDate(d) {
   if (!d) return "";
-  const dt = new Date(d + "T00:00:00");
-  return dt.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+
+  try {
+    let dt;
+
+    // kalau format sudah yyyy-mm-dd
+    if (typeof d === "string" && d.includes("-")) {
+      dt = new Date(d + "T00:00:00");
+    } else {
+      dt = new Date(d);
+    }
+
+    // invalid fallback
+    if (isNaN(dt.getTime())) return "-";
+
+    return dt.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return "-";
+  }
 }
 function formatMonthLabel(m) {
   const [y, mo] = m.split("-");
@@ -1485,3 +1558,8 @@ function loadDemoData() {
 // ─── START ───
 loadDemoData();
 init();
+setInterval(() => {
+  if (state.scriptUrl) {
+    syncAll();
+  }
+}, 15000);
