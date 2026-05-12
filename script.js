@@ -9,7 +9,7 @@ let state = {
   transactions: [],
   budgets: {},
   categories: {
-    income: ["Gaji", "Freelance", "Investasi", "Bisnis", "Bonus", "Lainnya"],
+    income: ["Gaji", "Uang Saku", "Pemberian", "Freelance", "Bonus", "Lainnya"],
     expense: [
       "Makanan",
       "Transport",
