@@ -18,7 +18,6 @@ let state = {
       "Hiburan",
       "Belanja",
       "Pendidikan",
-      "Tabungan",
       "Lainnya",
     ],
   },
