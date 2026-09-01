@@ -1,4 +1,4 @@
-# edocoin 🪙
+# EDOCOIN - FINANCE
 
 A modern, lightweight web-based financial dashboard designed to manage your personal finances seamlessly. It utilizes Google Sheets as a secure, real-time database via Google Apps Script, eliminating the need for complex database setups.
 
