@@ -73,18 +73,18 @@ Follow these steps to set up your Google Sheets database backend:
 Copy and paste this code into your Google Apps Script Editor:
 
 ```javascript
-// edocoin - Google Apps Script Backend
-// Deploy as Web App (Anyone can access)
+// Edocoin — Google Apps Script Backend
+// Deploy sebagai Web App (Anyone can access)
 
 const SHEET_NAME = 'Transaksi';
-const HEADERS = ['ID', 'Tanggal', 'Tipe', 'Kategori', 'Deskripsi', 'Jumlah', 'Catatan', 'Timestamp'];
+const HEADERS = ['ID','Tanggal','Tipe','Kategori','Deskripsi','Jumlah','Catatan','Timestamp'];
 
 function doGet(e) {
   const action = e.parameter.action;
   const sheet = e.parameter.sheet || SHEET_NAME;
   
   if (action === 'PING') {
-    return jsonResponse({status: 'ok', message: 'edocoin Connected'});
+    return jsonResponse({status: 'ok', message: 'Edocoin Connected'});
   }
   
   if (action === 'GET_ALL') {
@@ -95,13 +95,108 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  // Handle data insertion logic here
+  try {
+    const body = JSON.parse(e.postData.contents);
+    const { action, data, sheet } = body;
+    const sheetName = sheet || SHEET_NAME;
+    
+    ensureSheet(sheetName);
+    
+    if (action === 'ADD') return addRow(sheetName, data);
+    if (action === 'UPDATE') return updateRow(sheetName, data);
+    if (action === 'DELETE') return deleteRow(sheetName, data.id);
+    
+    return jsonResponse({status: 'error', message: 'Unknown action'});
+  } catch(err) {
+    return jsonResponse({status: 'error', message: err.message});
+  }
 }
 
-function jsonResponse(output) {
-  return ContentService.createTextOutput(JSON.stringify(output))
+function ensureSheet(name) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
+    sheet.getRange(1, 1, 1, HEADERS.length)
+      .setBackground('#1e2d42')
+      .setFontColor('#ffffff')
+      .setFontWeight('bold');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function getAll(sheetName) {
+  const sheet = ensureSheet(sheetName);
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return jsonResponse({transactions: []});
+  
+  const headers = data[0];
+  const transactions = data.slice(1).map(row => {
+    const obj = {};
+    headers.forEach((h, i) => obj[h.toLowerCase()] = row[i]);
+    return {
+      id: obj['id'], date: obj['tanggal'],
+      type: obj['tipe'], category: obj['kategori'],
+      description: obj['deskripsi'], amount: parseFloat(obj['jumlah'])||0,
+      note: obj['catatan'], timestamp: obj['timestamp']
+    };
+  }).filter(t => t.id);
+  
+  return jsonResponse({transactions, total: transactions.length});
+}
+
+function addRow(sheetName, data) {
+  const sheet = ensureSheet(sheetName);
+  const row = [data.id, data.date, data.type, data.category,
+               data.description, data.amount, data.note||'', data.timestamp];
+  sheet.appendRow(row);
+  
+  // Format amount column
+  const lastRow = sheet.getLastRow();
+  sheet.getRange(lastRow, 6).setNumberFormat('#,##0');
+  
+  // Color rows by type
+  const color = data.type === 'income' ? '#e8f5e9' : '#fce4ec';
+  sheet.getRange(lastRow, 1, 1, HEADERS.length).setBackground(color);
+  
+  return jsonResponse({status: 'success', id: data.id});
+}
+
+function updateRow(sheetName, data) {
+  const sheet = ensureSheet(sheetName);
+  const rows = sheet.getDataRange().getValues();
+  for (let i = 1; i < rows.length; i++) {
+    if (rows[i][0] === data.id) {
+      sheet.getRange(i+1, 1, 1, HEADERS.length).setValues([
+        [data.id, data.date, data.type, data.category,
+         data.description, data.amount, data.note||'', data.timestamp]
+      ]);
+      return jsonResponse({status: 'success'});
+    }
+  }
+  return addRow(sheetName, data);
+}
+
+function deleteRow(sheetName, id) {
+  const sheet = ensureSheet(sheetName);
+  const rows = sheet.getDataRange().getValues();
+  for (let i = rows.length - 1; i >= 1; i--) {
+    if (rows[i][0] === id) {
+      sheet.deleteRow(i + 1);
+      return jsonResponse({status: 'success'});
+    }
+  }
+  return jsonResponse({status: 'not_found'});
+}
+
+function jsonResponse(data) {
+  return ContentService
+    .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
 ```
 
 
