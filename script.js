@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════
-//  Abu Khaisa — CORE APP
+//  EdoCoin
 // ═══════════════════════════════════════════════════
 
 // ─── STATE ───
@@ -45,7 +45,7 @@ function init() {
 
 function loadFromStorage() {
   try {
-    const d = JSON.parse(localStorage.getItem("Abu Khaisa") || "{}");
+    const d = JSON.parse(localStorage.getItem("EdoCoin") || "{}");
     if (d.scriptUrl) state.scriptUrl = d.scriptUrl;
     if (d.sheetName) state.sheetName = d.sheetName;
     if (d.transactions) state.transactions = d.transactions;
@@ -63,7 +63,7 @@ function loadFromStorage() {
 
 function saveToStorage() {
   localStorage.setItem(
-    "Abu Khaisa",
+    "EdoCoin",
     JSON.stringify({
       scriptUrl: state.scriptUrl,
       sheetName: state.sheetName,
@@ -1259,7 +1259,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "Abu Khaisa-" + currentMonth + ".csv";
+  a.download = "EdoCoin" + currentMonth + ".csv";
   a.click();
   URL.revokeObjectURL(url);
   toast("CSV berhasil diexport", "success");
@@ -1281,7 +1281,7 @@ function clearLocalData() {
 
 // ─── APPS SCRIPT CODE ───
 function renderAppsScriptCode() {
-  const code = `// Abu Khaisa — Google Apps Script Backend
+  const code = `// EdoCoin — Google Apps Script Backend
 // Deploy sebagai Web App (Anyone can access)
 
 const SHEET_NAME = 'Transaksi';
@@ -1292,7 +1292,7 @@ function doGet(e) {
   const sheet = e.parameter.sheet || SHEET_NAME;
   
   if (action === 'PING') {
-    return jsonResponse({status: 'ok', message: 'Abu Khaisa Connected'});
+    return jsonResponse({status: 'ok', message: 'EdoCoin Connected'});
   }
   
   if (action === 'GET_ALL') {
