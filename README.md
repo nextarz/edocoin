@@ -1,76 +1,76 @@
 # EDOCOIN - FINANCE
 
-A modern, lightweight web-based financial dashboard designed to manage your personal finances seamlessly. It utilizes Google Sheets as a secure, real-time database via Google Apps Script, eliminating the need for complex database setups.
+Dashboard keuangan berbasis web modern dan ringan yang dirancang untuk mengelola keuangan pribadi Anda dengan lancar. Aplikasi ini menggunakan Google Sheets sebagai basis data *real-time* yang aman melalui Google Apps Script, sehingga tidak memerlukan pengaturan basis data yang rumit.
 
-## 🚀 Features
+## 🚀 Fitur
 
-*   **Google Spreadsheet Integration:** Connects directly to your Google Sheets using a single Web App URL.
-*   **Real-time Synchronization:** Automatically syncs and saves financial data.
-*   **Comprehensive Dashboard:** Visualizes Net Balance (Saldo Bersih), Total Income (Total Pemasukan), Total Expense (Total Pengeluaran), and Savings Rate (Tingkat Tabungan).
-*   **6-Month Financial Trend:** Monitors your financial health with an interactive line chart tracking long-term trends.
-*   **Expense Categorization:** Breaks down expenses into clear visual charts for better budgeting.
-*   **Transaction Management:** Easily log, modify, and track daily financial activities.
+*   **Integrasi Google Spreadsheet:** Terhubung langsung ke Google Sheets Anda menggunakan satu URL Web App.
+*   **Sinkronisasi Real-time:** Menyinkronkan dan menyimpan data keuangan secara otomatis.
+*   **Dashboard Komprehensif:** Memvisualisasikan Saldo Bersih, Total Pemasukan, Total Pengeluaran, dan Tingkat Tabungan.
+*   **Tren Keuangan 6 Bulan:** Memantau kesehatan keuangan Anda dengan grafik garis interaktif yang melacak tren jangka panjang.
+*   **Kategorisasi Pengeluaran:** Memecah pengeluaran ke dalam grafik visual yang jelas untuk penganggaran (*budgeting*) yang lebih baik.
+*   **Manajemen Transaksi:** Mencatat, mengubah, dan melacak aktivitas keuangan harian Anda dengan mudah.
 
-## 🛠️ Prerequisites
+## 🛠️ Prasyarat
 
-Before setting up the web interface, you need:
-1. A Google Account.
-2. A Google Spreadsheet formatted to receive data.
-3. A deployed Google Apps Script Web App URL (`https://script.google.com/macros/s/.../exec`).
+Sebelum menyiapkan antarmuka web, Anda memerlukan:
+1. Akun Google.
+2. Google Spreadsheet yang telah diformat untuk menerima data.
+3. URL Web App Google Apps Script yang telah diterapkan (`https://google.com`).
 
-## ⚙️ Setup & Installation
+## ⚙️ Penyiapan & Instalasi
 
-### Web Application Setup
+### Penyiapan Aplikasi Web
 
-1. **Clone the repository:**
+1. **Klon repositori:**
    ```bash
-   git clone https://github.com/nextarz/edocoin
+   git clone https://github.com
    cd edocoin
    ```
 
-2. **Open the application:**
-   Launch the `index.html` file in your preferred web browser or deploy it via GitHub Pages.
+2. **Buka aplikasi:**
+   Jalankan file `index.html` di peramban web pilihan Anda atau terapkan melalui GitHub Pages.
 
-3. **Connect the Database:**
-   * Open the application dashboard.
-   * Paste your **Google Apps Script Web App URL** into the input field under "Hubungkan ke Google Spreadsheet".
-   * Click **Hubungkan** (Connect).
-   * Use **Test Koneksi** (Test Connection) to ensure the setup is successful.
-
----
-
-### 💻 Google Apps Script Setup Guide
-
-Follow these steps to set up your Google Sheets database backend:
-
-1. **Create a New Google Spreadsheet:**
-   * Go to Google Drive -> New -> Google Sheets.
-   * Name the spreadsheet as you like (e.g., `edocoin Finance`).
-
-2. **Open Apps Script:**
-   * Inside your spreadsheet, click **Extensions** -> **Apps Script**.
-   * Delete any existing code in the editor.
-   * Paste the Apps Script code provided below.
-
-3. **Deploy as a Web App:**
-   * Click **Deploy** -> **New Deployment**.
-   * Select **Web App** as the deployment type.
-   * Set *Execute as* to: **"Me"**.
-   * Set *Who has access* to: **"Anyone"**.
-   * Click **Deploy**.
-
-4. **Copy the Web App URL:**
-   * After deployment, copy the generated URL (format: `https://script.google.com/macros/s/.../exec`).
-
-5. **Paste URL into edocoin:**
-   * Paste the copied URL into the configuration field on your **edocoin** dashboard.
-   * Click **Hubungkan** (Connect).
+3. **Hubungkan Basis Data:**
+   * Buka dashboard aplikasi.
+   * Tempel URL Web App Google Apps Script Anda ke dalam kolom input di bawah "Hubungkan ke Google Spreadsheet".
+   * Klik **Hubungkan**.
+   * Gunakan **Test Koneksi** untuk memastikan penyiapan berhasil.
 
 ---
 
-### 📜 Google Apps Script Code
+### 💻 Panduan Penyiapan Google Apps Script
 
-Copy and paste this code into your Google Apps Script Editor:
+Ikuti langkah-langkah berikut untuk menyiapkan backend basis data Google Sheets Anda:
+
+1. **Buat Google Spreadsheet Baru:**
+   * Buka Google Drive -> Baru -> Google Spreadsheet.
+   * Beri nama spreadsheet sesuai keinginan Anda (misalnya, `edocoin Finance`).
+
+2. **Buka Apps Script:**
+   * Di dalam spreadsheet Anda, klik **Ekstensi** -> **Apps Script**.
+   * Hapus semua kode yang ada di dalam editor.
+   * Tempel kode Apps Script yang disediakan di bawah ini.
+
+3. **Terapkan sebagai Web App:**
+   * Klik **Terapkan** (*Deploy*) -> **Terapkan Baru** (*New Deployment*).
+   * Pilih **Aplikasi Web** (*Web App*) sebagai jenis penerapan.
+   * Atur *Jalankan sebagai* (*Execute as*) ke: **"Saya"** (*"Me"*).
+   * Atur *Siapa yang memiliki akses* (*Who has access*) ke: **"Siapa saja"** (*"Anyone"*).
+   * Klik **Terapkan** (*Deploy*).
+
+4. **Salin URL Web App:**
+   * Setelah penerapan selesai, salin URL yang dihasilkan (format: `https://google.com`).
+
+5. **Tempel URL ke edocoin:**
+   * Tempel URL yang telah disalin ke dalam kolom konfigurasi pada dashboard **edocoin** Anda.
+   * Klik **Hubungkan**.
+
+---
+
+### 📜 Kode Google Apps Script
+
+Salin dan tempel kode ini ke dalam Editor Google Apps Script Anda:
 
 ```javascript
 // Edocoin — Google Apps Script Backend
@@ -196,7 +196,4 @@ function jsonResponse(data) {
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
 }
-
 ```
-
-
