@@ -104,10 +104,4 @@ function jsonResponse(output) {
 }
 ```
 
-## 🖥️ Preview
 
-The interface features a dark-themed user interface with sidebar navigation including Dashboard, Transactions, Reports, Budgeting, Configuration, and Setup Guides.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
